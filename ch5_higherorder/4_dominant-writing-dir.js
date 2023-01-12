@@ -143,26 +143,37 @@ function printPropertyProportions2(text, ...propNames){
     for (let i = 0; i < fList.length; i++){
         scriptsList.push(fList[i](text).filter(s => s[propNames[i]] != 'none'));
     }
-    console.log(scriptsList);
+    // console.log(scriptsList.length);
 
+    let printStr = text + " :::: ";
+    let total = scriptsList[0].reduce((sum, {count})=> sum + count, 0);
+
+    // return scriptsList.reduce((a, b) => {
+    //     return a.map(({pName, count}) =>{
+    //         return `${pName}: ${(count/total*100).toFixed(1)}%`;
+    //     }).join(', ') + b.map(({[propNames[0]] : pName, count}) =>{
+    //         return `${pName}: ${(count/total*100).toFixed(1)}%`;
+    //     }).join(', ');
+    //  }
+    // );
     for (let i = 0; i < scriptsList.length; i++){
-        console.log(scriptsList[i]);
-        let total = scriptsList[i].reduce((sum, {count})=> sum + count, 0) || 100;
-
-        return text + " :::: " + scriptsList[i].map(({[propNames[i]] : pName, count}) =>{
-            return `${pName}: ${(count/total*100).toFixed(2)}%`;
+        if (i > 0) printStr += '; ';
+        printStr += scriptsList[i].map(({[propNames[i]] : pName, count}) =>{
+            return `${pName}: ${(count/total*100).toFixed(1)}%`;
         }).join(', ');
     }
+    return printStr;
 
 }
 
 console.log(printPropertyProportions2('ㅠ미ㅓㄹ히ㅏㅓ helkjl;akjsdf', 'name', 'direction'));
+console.log(printPropertyProportions2("ᠭᠠᠵᠠᠷ ᠠ 英国的狗说woof", 'name', 'year', 'direction'));
 // console.log(printPropertyProportions('ㅠ미ㅓㄹ히ㅏㅓ helkjl;akjsdf', 'name'));
 // console.log(printDominantProperty3("Hello 안녕하시오리까", 'name', 'direction'));
 // console.log(printDominantProperty3("ᠭᠠᠵᠠᠷ ᠠ", 'name', 'year', 'direction'));
 // console.log(countPropertyArr("ᠭᠠᠵᠠᠷ ᠠ", 'name'));
-console.log(printDominantProperty2("Hello 안녕하십니까?", 'name'));
-console.log(printDominantProperty3("Hey, مساء الخير", 'year'));
+// console.log(printDominantProperty2("Hello 안녕하십니까?", 'name'));
+// console.log(printDominantProperty3("Hey, مساء الخير", 'year'));
 
 let countDir = f_countProperties('direction');
 let countName = f_countProperties('name');
