@@ -1,0 +1,13 @@
+{
+  "name": "ch5_higherorder",
+  "version": "1.0.0",
+  "main": "05_higher_order.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "keywords": [],
+  "description": ""
+}
