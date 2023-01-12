@@ -18,8 +18,6 @@ function dominantDirection(text) {
         let script = characterScript(char.codePointAt(0));
         return script ? script.direction : 'none';
     }, 'direction').filter(e => e.direction !== 'none');
-
-    // console.log(scripts);
     //iterate over script objects, and compare;
    return `dominant direction: ${
     scripts.reduce((a, b) => {
@@ -67,20 +65,18 @@ function printDominantProperty(text, propertyStr){
         })[propertyStr]}`;
 }
 
-
-
-//third, function that creates functions on counting properties
+//third, function that returns functions on counting properties
 function f_countProperties (propName){
-    let propertyName = propName;
+    let pName = propName;
     return function(items){
         let counts = [];
         for (let item of items){
             let prop = (()=>{
                 let script = characterScript(item.codePointAt(0));
-                return script ? script[propName] : 'none';
+                return script ? script[pName] : 'none';
             })();
-            let knownIdx = counts.findIndex(c => c[propName] === prop);
-            if (knownIdx === -1) counts.push({[propName] : prop, count: 1});
+            let knownIdx = counts.findIndex(c => c[pName] === prop);
+            if (knownIdx === -1) counts.push({[pName] : prop, count: 1});
             else counts[knownIdx].count++;
         }
         return counts;
@@ -88,7 +84,8 @@ function f_countProperties (propName){
 }
 
 //forth, a function that prints out the dominant property
-function printDominantProperty2(text, f, propName){
+function printDominantProperty2(text, propName){
+    let f = f_countProperties(propName);
     let scripts = f(text).filter(s => s[propName] !== 'none');
     return `text: ${text}, dominant ${propName}: ${
         scripts.reduce((a, b) => {
@@ -103,8 +100,8 @@ console.log(printDominantProperty("Hey, مساء الخير", 'year'));
 
 let countDir = f_countProperties('direction');
 let countName = f_countProperties('name');
-console.log(printDominantProperty2("Hello!", countName, 'name'));
-console.log(printDominantProperty2("Hey, مساء الخير", countDir, 'direction'));
+console.log(printDominantProperty2("Hello!", 'year'));
+// console.log(printDominantProperty2("Hey, مساء الخير", countDir, 'direction'));
 
 //function that can print out many texts
 
