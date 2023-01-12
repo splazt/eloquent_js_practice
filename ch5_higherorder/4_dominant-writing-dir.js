@@ -1,43 +1,43 @@
 import './scripts.js';
 import {characterScript, countBy} from './05_higher_order.js';
 
-function dominantDirection_textbook(text) {
-    let counted = countBy(text, char => {
-      let script = characterScript(char.codePointAt(0));
-      return script ? script.direction : "none";
-    }).filter(({name}) => name != "none");
+// function dominantDirection_textbook(text) {
+//     let counted = countBy(text, char => {
+//       let script = characterScript(char.codePointAt(0));
+//       return script ? script.direction : "none";
+//     }).filter(({name}) => name != "none");
 
-    console.dir(counted);
-    if (counted.length == 0) return "ltr";
+//     console.dir(counted);
+//     if (counted.length == 0) return "ltr";
 
-    return counted.reduce((a, b) => a.count > b.count ? a : b).name;
-  }
+//     return counted.reduce((a, b) => a.count > b.count ? a : b).name;
+//   }
 
-function dominantDirection(text) {
-    let scripts = countPropertyArr(text, char => {
-        let script = characterScript(char.codePointAt(0));
-        return script ? script.direction : 'none';
-    }, 'direction').filter(e => e.direction !== 'none');
-    //iterate over script objects, and compare;
-   return `dominant direction: ${
-    scripts.reduce((a, b) => {
-        if (a.count < b.count) return b;
-        else return a;
-    }).direction
-   }`;
-  }
+// function dominantDirection(text) {
+//     let scripts = countPropertyArr(text, char => {
+//         let script = characterScript(char.codePointAt(0));
+//         return script ? script.direction : 'none';
+//     }, 'direction').filter(e => e.direction !== 'none');
+//     //iterate over script objects, and compare;
+//    return `dominant direction: ${
+//     scripts.reduce((a, b) => {
+//         if (a.count < b.count) return b;
+//         else return a;
+//     }).direction
+//    }`;
+//   }
 
-function writingDirCount(items, groupName){
-    let counts = [];
-    for (let item of items){
-        let dir = groupName(item);
-        let known = counts.findIndex(c => c.dir === dir);
-        // console.log('known: ' + known);
-        if (known === -1) counts.push({dir, count: 1});
-        else counts[known].count++;
-    }
-    return counts;
-}
+// function writingDirCount(items, groupName){
+//     let counts = [];
+//     for (let item of items){
+//         let dir = groupName(item);
+//         let known = counts.findIndex(c => c.dir === dir);
+//         // console.log('known: ' + known);
+//         if (known === -1) counts.push({dir, count: 1});
+//         else counts[known].count++;
+//     }
+//     return counts;
+// }
 
 function extractPropName(ch, propName){
     let script = characterScript(ch.codePointAt(0));
@@ -60,8 +60,7 @@ function printDominantProperty(text, propertyStr){
     let scripts = countPropertyArr(text, propertyStr);
     return `text: ${text}, dominant ${propertyStr}: ${
         scripts.reduce((a, b) => {
-            if (a.count < b.count) return b;
-            else return a;
+            return a.count < b.count ? b : a;
         })[propertyStr]}`;
 }
 
@@ -93,14 +92,81 @@ function printDominantProperty2(text, propName){
         })[propName]}`;
 }
 
-console.log(countPropertyArr("ᠭᠠᠵᠠᠷ ᠠ", 'name'));
-console.log(printDominantProperty("Hey, مساء الخير", 'direction'));
-console.log(printDominantProperty("Hey, مساء الخير", 'year'));
+function printDominantProperty3(text, ...propNames){
 
+    let fList = [];
+    let scripts = [];
+    for (let pName of propNames){
+        fList.push(f_countProperties(pName));
+    }
+
+    for (let i = 0; i < fList.length; i++){
+        // console.log(fList[i](text).filter(s => s[propNames[i]] != 'none'));
+        scripts.push(fList[i](text).filter(s => s[propNames[i]] != 'none'));
+    }
+
+    // return scripts;
+    let resultStr = `text: ${text} - `;
+    for (let i = 0; i < scripts.length; i++){
+        resultStr += `dominant ${propNames[i]}: ${
+            scripts[i].reduce((a, b) => {
+            return a.count < b.count ? b : a;
+        })[propNames[i]]}` + (i !== scripts.length -1 ? ', ' : '') ;
+    }
+
+    return resultStr;
+}
+
+
+//compute average of properties
+function printPropertyProportions(text, propName){
+
+    let f = f_countProperties(propName);
+    let scripts = f(text).filter(s => s[propName] !== 'none');
+
+    let total = scripts.reduce((sum, {count})=> sum + count, 0);
+
+    return text + " :::: " + scripts.map(({[propName] : pName, count}) =>{
+        return `${pName}: ${(count/total*100).toFixed(2)}%`;
+    }).join(', ');
+
+}
+
+function printPropertyProportions2(text, ...propNames){
+
+    let fList = [];
+    let scriptsList = [];
+    for (let pName of propNames){
+        fList.push(f_countProperties(pName));
+    }
+
+    for (let i = 0; i < fList.length; i++){
+        scriptsList.push(fList[i](text).filter(s => s[propNames[i]] != 'none'));
+    }
+    console.log(scriptsList);
+
+    for (let i = 0; i < scriptsList.length; i++){
+        console.log(scriptsList[i]);
+        let total = scriptsList[i].reduce((sum, {count})=> sum + count, 0) || 100;
+
+        return text + " :::: " + scriptsList[i].map(({[propNames[i]] : pName, count}) =>{
+            return `${pName}: ${(count/total*100).toFixed(2)}%`;
+        }).join(', ');
+    }
+
+}
+
+console.log(printPropertyProportions2('ㅠ미ㅓㄹ히ㅏㅓ helkjl;akjsdf', 'name', 'direction'));
+// console.log(printPropertyProportions('ㅠ미ㅓㄹ히ㅏㅓ helkjl;akjsdf', 'name'));
+// console.log(printDominantProperty3("Hello 안녕하시오리까", 'name', 'direction'));
+// console.log(printDominantProperty3("ᠭᠠᠵᠠᠷ ᠠ", 'name', 'year', 'direction'));
+// console.log(countPropertyArr("ᠭᠠᠵᠠᠷ ᠠ", 'name'));
+console.log(printDominantProperty2("Hello 안녕하십니까?", 'name'));
+console.log(printDominantProperty3("Hey, مساء الخير", 'year'));
 
 let countDir = f_countProperties('direction');
 let countName = f_countProperties('name');
-console.log(printDominantProperty2("Hello!", 'year'));
+// console.log(printDominantProperty2("Hello!", 'year'));
 // console.log(printDominantProperty2("Hey, مساء الخير", countDir, 'direction'));
 
 //function that can print out many texts
