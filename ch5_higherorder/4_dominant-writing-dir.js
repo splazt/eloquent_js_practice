@@ -4,20 +4,19 @@ import {characterScript, countBy} from './05_higher_order.js';
 
 
 function dominantDirection(text) {
-    //use countBy and characterScript ---- ientifies which character is what
     let scripts = CountPropertyArr(text, char => {
         let script = characterScript(char.codePointAt(0));
-        // console.log(Object.keys(script).length);
-        // console.log(script?.direction);
         return script ? script.direction : 'none';
-    }, 'direction').filter(e => e.dir !== 'none');
+    }, 'direction').filter(e => e.direction !== 'none');
 
     console.log(scripts);
     //iterate over script objects, and compare;
-   return scripts.reduce((a, b) => {
+   return `dominant direction: ${
+    scripts.reduce((a, b) => {
         if (a.count < b.count) return b;
         else return a;
-    }).dir;
+    }).direction
+   }`;
   }
 
 function writingDirCount(items, groupName){
@@ -32,13 +31,14 @@ function writingDirCount(items, groupName){
     return counts;
 }
 
-//function that creates functions on counting properties
+
+//first, a function that creates an array with counts of whatever property
 function CountPropertyArr(items, groupName, propertyName){
     let counts = [];
-    console.log(propertyName);
+    // console.log(propertyName);
     for (let item of items){
         let prop = groupName(item);
-        console.log(prop);
+        // console.log(prop);
         let knownIdx = counts.findIndex(c => c[propertyName] === prop);
         if (knownIdx === -1) counts.push({[propertyName] : prop, count: 1}); //note how propertyname is bracketed to create property name from variable
         else counts[knownIdx].count++;
@@ -46,7 +46,56 @@ function CountPropertyArr(items, groupName, propertyName){
     return counts;
 }
 
-  console.log(dominantDirection("Hello!"));
+//second, a function that spits out the most dominant property of a certain string
+function printDominantProperty(text, propertyStr){
+    let scripts = CountPropertyArr(text, ch => {
+        let script = characterScript(ch.codePointAt(0));
+        return script ? script[propertyStr] : 'none';
+    }, propertyStr).filter(s => s[propertyStr] !== 'none');
+
+    return `dominant ${propertyStr}: ${
+        scripts.reduce((a, b) => {
+            if (a.count < b.count) return b;
+            else return a;
+        })[propertyStr]}`;
+}
+
+//third, function that creates functions on counting properties
+function f_countProperties (propName){
+    let propertyName = propName;
+    return function(items){
+        let counts = [];
+        for (let item of items){
+            let prop = (()=>{
+                let script = characterScript(item.codePointAt(0));
+                return script ? script[propName] : 'none';
+            })();
+            let knownIdx = counts.findIndex(c => c[propName] === prop);
+            if (knownIdx === -1) counts.push({[propName] : prop, count: 1});
+            else counts[knownIdx].count++;
+        }
+        return counts;
+    }
+}
+
+let countDir = f_countProperties('direction');
+console.log(countDir("Hello!"));
+console.log(printDominantProperty2("Hello!", countDir, 'direction'));
+
+//forth, a function that prints out the dominant property
+function printDominantProperty2(text, f, propName){
+    let scripts = f(text).filter(s => s[propName] !== 'none');
+
+    return `dominant ${propName}: ${
+        scripts.reduce((a, b) => {
+            if (a.count < b.count) return b;
+            else return a;
+        })[propName]}`;
+}
+
+
+//   console.log(dominantDirection("Hello!"));
+//   console.log(printDominantProperty("Hello!", 'direction'));
   // → ltr
 //   console.log(dominantDirection("Hey, مساء الخير"));
   // → rtl
