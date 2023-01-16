@@ -15,10 +15,11 @@
 function every(arr, test){
   // return arr.some(test).length === arr.length;
   //if there is an opposite of test, and any array qualifies, print false;
-  if (!arr.length)return true;
-  return arr.some(function(el, i, arr){
-    return test(el) && i === arr.length - 1;
-  })
+  return !arr.some(el => !test(el));
+  // if (!arr.length)return true;
+  // return arr.some(function(el, i, arr){
+  //   return test(el) && i === arr.length - 1;
+  // })
 }
 
 console.log(every([1, 3, 5], n => n < 10));
